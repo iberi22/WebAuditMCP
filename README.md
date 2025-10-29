@@ -1,6 +1,6 @@
 <div align="center">
 
-![WebAuditMCP Logo](https://raw.githubusercontent.com/user/repo/main/logo.png)
+![WebAuditMCP Logo](https://raw.githubusercontent.com/iberi22/WebAuditMCP/blob/main/logo.svg)
 
 # WebAuditMCP
 
