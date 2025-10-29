@@ -1,0 +1,118 @@
+# ==============================================================================
+# MCP Auditor - Docker Compose Configuration
+# ==============================================================================
+# Professional deployment configuration for MCP web auditing server
+# Supports local development and production environments
+# ==============================================================================
+
+services:
+  # Main MCP Auditor Server
+  auditor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: mcp-auditor:latest
+    container_name: mcp-auditor
+    env_file:
+      # Load environment variables from .env file in parent directory
+      - ../.env
+    environment:
+      # FastMCP Configuration
+      - CHROME_MCP_ENABLED=true
+      - PYTHONUNBUFFERED=1
+      - NODE_ENV=production
+
+      # Chrome DevTools - Headless mode for Docker
+      - CHROME_HEADLESS=true
+      - CHROME_ARGS=--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage
+
+      # Override from .env if needed
+      - WAVE_API_KEY=${WAVE_API_KEY:-}
+      - ZAP_API_KEY=${ZAP_API_KEY:-}
+
+      # Test credentials (will be loaded from .env)
+      - TEST_USERNAME=${TEST_USERNAME:-testuser}
+      - TEST_PASSWORD=${TEST_PASSWORD:-testpass123}
+      - TEST_EMAIL=${TEST_EMAIL:-test@example.com}
+
+    volumes:
+      # Persistent artifacts directory
+      - ../artifacts:/app/artifacts:rw
+
+    ports:
+      # HTTP transport for MCP protocol
+      - "8000:8000"
+
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    # Health monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/mcp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Restart policy for production reliability
+    restart: unless-stopped
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # OWASP ZAP Security Scanner (Optional)
+  # Enable with: docker-compose --profile zap-scan up
+  zap:
+    image: owasp/zap2docker-stable
+    container_name: mcp-auditor-zap
+    command: ["zap.sh", "-daemon", "-host", "0.0.0.0", "-port", "8080", "-config", "api.disablekey=true"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../artifacts:/zap/wrk:rw
+    profiles:
+      - zap-scan
+    restart: unless-stopped
+
+    # Resource limits for ZAP
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ==============================================================================
+# Networks Configuration
+# ==============================================================================
+networks:
+  default:
+    name: mcp-auditor-network
+    driver: bridge
+
+# ==============================================================================
+# Volumes Configuration
+# ==============================================================================
+volumes:
+  artifacts:
+    driver: local

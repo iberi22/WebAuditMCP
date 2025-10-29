@@ -1,0 +1,28 @@
+{
+  "name": "mcp-auditor-local-node-tools",
+  "version": "1.1.0",
+  "description": "Node.js tools for MCP Auditor Local",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npx playwright install --with-deps",
+    "test": "vitest run",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format ."
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.8.2",
+    "playwright": "^1.40.0",
+    "chrome-devtools-mcp": "latest",
+    "lighthouse": "^11.0.0",
+    "hint": "^7.1.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.1",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

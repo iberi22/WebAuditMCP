@@ -1,0 +1,23 @@
+{
+  "name": "mcp-auditor-local",
+  "version": "1.1.0",
+  "description": "Local-first MCP server for web auditing tools",
+  "main": "mcp/server.py",
+  "scripts": {
+    "setup": "python setup.py",
+    "lint": "npm run lint --workspace=node-tools",
+    "lint:fix": "npm run lint:fix --workspace=node-tools",
+    "test": "npm run test --workspace=node-tools",
+    "format": "npm run format --workspace=node-tools",
+    "format:check": "npm run format:check --workspace=node-tools",
+    "dev:checks": "bash scripts/dev_checks.sh"
+  },
+  "workspaces": [
+    "node-tools"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.10.0"
+  },
+  "license": "MIT"
+}
