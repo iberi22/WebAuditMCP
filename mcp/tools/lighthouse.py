@@ -4,6 +4,7 @@ Lighthouse audit tool for performance, SEO, accessibility, and best practices.
 
 import json
 import logging
+import os
 import shutil
 import subprocess
 import tempfile
@@ -12,10 +13,40 @@ from typing import Any, Literal
 
 logger = logging.getLogger(__name__)
 
+def _resolve_npx_command() -> str | None:
+    """Get platform-appropriate npx executable path."""
+    candidates = ["npx"]
+    if os.name == "nt":
+        candidates = ["npx.cmd", "npx"]
+
+    for candidate in candidates:
+        path = shutil.which(candidate)
+        if path:
+            return path
+    return None
+
+
+def _resolve_lighthouse_runner() -> tuple[list[str], bool] | None:
+    """Determine how to invoke Lighthouse.
+
+    Returns:
+        Tuple of (base command list, uses_npx flag) or None if unavailable.
+    """
+    direct_cmd = shutil.which("lighthouse.cmd") if os.name == "nt" else shutil.which("lighthouse")
+    if direct_cmd:
+        return ([direct_cmd], False)
+
+    npx_cmd = _resolve_npx_command()
+    if npx_cmd:
+        return ([npx_cmd, "-y", "lighthouse"], True)
+
+    return None
+
+
 def _check_lighthouse_available() -> dict[str, Any]:
     """Check if Lighthouse is available and provide installation instructions."""
-    # Check if npx is available
-    if not shutil.which("npx"):
+    runner = _resolve_lighthouse_runner()
+    if not runner:
         return {
             "available": False,
             "error": "npx not found. Node.js is required.",
@@ -28,8 +59,13 @@ def _check_lighthouse_available() -> dict[str, Any]:
 
     # Try to run lighthouse to check if it's accessible
     try:
+        base_cmd, uses_npx = runner
+        version_cmd = base_cmd + ["--version"]
+        if uses_npx:
+            version_cmd.insert(len(base_cmd), "--")
+
         result = subprocess.run(
-            ["npx", "-y", "lighthouse", "--version"],
+            version_cmd,
             capture_output=True,
             text=True,
             timeout=30
@@ -82,8 +118,8 @@ def audit_lighthouse(url: str, device: Literal["mobile", "desktop"] = "mobile") 
             logger.info(f"Auditing localhost URL: {url}")
             logger.info("Make sure your development server is running")
 
-        # Set preset based on device
-        preset = "mobile" if device == "mobile" else "desktop"
+        # Desktop preset explicitly requested, mobile is default behaviour
+        preset = "desktop" if device == "desktop" else None
 
         # Create temporary file for output
         with tempfile.NamedTemporaryFile(mode='w+', suffix='.json', delete=False) as tmp_file:
@@ -109,14 +145,24 @@ def audit_lighthouse(url: str, device: Literal["mobile", "desktop"] = "mobile") 
             ]
 
             # Run Lighthouse
-            cmd = [
-                "npx", "-y", "lighthouse", url,
-                f"--preset={preset}",
+            runner = _resolve_lighthouse_runner()
+            if not runner:
+                raise FileNotFoundError("npx executable not found in PATH")
+
+            base_cmd, uses_npx = runner
+            cmd = base_cmd.copy()
+            if uses_npx:
+                cmd.append("--")
+
+            cmd.append(url)
+            cmd += [
                 "--output=json",
                 f"--output-path={tmp_path}",
                 "--quiet",
                 f"--chrome-flags={' '.join(chrome_flags)}"
             ]
+            if preset:
+                cmd.append(f"--preset={preset}")
 
             logger.info(f"Running Lighthouse audit for {url} with {device} preset")
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)

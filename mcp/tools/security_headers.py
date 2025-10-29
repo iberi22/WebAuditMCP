@@ -4,6 +4,7 @@ Security headers analysis tool.
 
 import json
 import logging
+import re
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -38,7 +39,25 @@ def security_headers(url: str) -> dict[str, Any]:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
         if result.returncode != 0:
-            raise RuntimeError(f"Security headers analysis failed: {result.stderr}")
+            error_info = _parse_error_output(result)
+
+            # Handle common network errors gracefully
+            error_message = error_info.get("error_message", "Security headers analysis failed")
+            if _is_connection_refused(error_message):
+                logger.warning(f"Security headers analysis connection refused for {url}")
+                return {
+                    'status': 'error',
+                    'error': 'Connection refused - server not reachable',
+                    'url': url,
+                    'code': 'CONNECTION_REFUSED',
+                    'suggestion': (
+                        "Make sure your development server is running and reachable at the given URL. "
+                        "If it runs on a different port, pass the correct URL."
+                    ),
+                    'details': error_info.get("details")
+                }
+
+            raise RuntimeError(f"Security headers analysis failed: {error_message}")
 
         # Parse JSON output
         raw_data = json.loads(result.stdout)
@@ -84,3 +103,56 @@ def security_headers(url: str) -> dict[str, Any]:
             'status': 'error',
             'error': str(e)
         }
+
+
+def _parse_error_output(result: subprocess.CompletedProcess) -> dict[str, Any]:
+    """Parse stderr/stdout from the Node script into a structured error."""
+    raw_stderr = (result.stderr or "").strip()
+    raw_stdout = (result.stdout or "").strip()
+
+    payload = raw_stderr or raw_stdout
+    parsed: dict[str, Any] = {}
+
+    if payload:
+        try:
+            parsed_json = json.loads(payload)
+            if isinstance(parsed_json, dict):
+                parsed = parsed_json
+        except json.JSONDecodeError:
+            # Some tools include ANSI codes; strip them for readability
+            cleaned = _strip_ansi(payload)
+            parsed = {"error": cleaned}
+
+    error_message = parsed.get("error") if isinstance(parsed, dict) else None
+
+    if not error_message and payload:
+        error_message = _strip_ansi(payload)
+
+    details: dict[str, Any] = {}
+    if isinstance(parsed, dict):
+        details = parsed
+
+    return {
+        "error_message": error_message or "Unknown error",
+        "details": details or None
+    }
+
+
+def _strip_ansi(text: str) -> str:
+    """Remove ANSI escape codes from error output."""
+    ansi_escape = re.compile(r'\x1B\[[0-9;]*[mK]')
+    return ansi_escape.sub('', text)
+
+
+def _is_connection_refused(message: str | None) -> bool:
+    """Detect connection refused errors in error messages."""
+    if not message:
+        return False
+
+    patterns = [
+        "ERR_CONNECTION_REFUSED",
+        "ECONNREFUSED",
+        "Connection refused",
+        "net::ERR_CONNECTION_REFUSED"
+    ]
+    return any(pattern.lower() in message.lower() for pattern in patterns)

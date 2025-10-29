@@ -68,7 +68,11 @@ async function analyzeSecurityHeaders(url) {
 // Parse command line arguments
 const args = process.argv.slice(2);
 if (args.length < 1) {
-  console.error('Usage: node security-headers.js <url>');
+  console.error(
+    JSON.stringify({
+      error: 'Usage: node security-headers.js <url>',
+    })
+  );
   process.exit(1);
 }
 
@@ -76,7 +80,11 @@ const url = args[0];
 
 // Validate URL
 if (!url.startsWith('http://') && !url.startsWith('https://')) {
-  console.error('URL must start with http:// or https://');
+  console.error(
+    JSON.stringify({
+      error: 'URL must start with http:// or https://',
+    })
+  );
   process.exit(1);
 }
 

@@ -141,8 +141,12 @@ async function runResponsiveAudit(url, viewports) {
 // Parse command line arguments
 const args = process.argv.slice(2);
 if (args.length < 2) {
-  console.error('Usage: node responsive.js <url> <viewport1> [viewport2] [viewport3] ...');
-  console.error('Example: node responsive.js https://example.com 360x640 768x1024 1280x800');
+  console.error(
+    JSON.stringify({
+      error: 'Usage: node responsive.js <url> <viewport1> [viewport2] [viewport3] ...',
+      example: 'node responsive.js https://example.com 360x640 768x1024 1280x800',
+    })
+  );
   process.exit(1);
 }
 
@@ -151,14 +155,22 @@ const viewports = args.slice(1);
 
 // Validate URL
 if (!url.startsWith('http://') && !url.startsWith('https://')) {
-  console.error('URL must start with http:// or https://');
+  console.error(
+    JSON.stringify({
+      error: 'URL must start with http:// or https://',
+    })
+  );
   process.exit(1);
 }
 
 // Validate viewports
 for (const viewport of viewports) {
   if (!/^\d+x\d+$/.test(viewport)) {
-    console.error(`Invalid viewport format: ${viewport}. Use format: 360x640`);
+    console.error(
+      JSON.stringify({
+        error: `Invalid viewport format: ${viewport}. Use format: 360x640`,
+      })
+    );
     process.exit(1);
   }
 }

@@ -48,7 +48,12 @@ async function runAxeScan(url, device = 'mobile') {
 // Parse command line arguments
 const args = process.argv.slice(2);
 if (args.length < 1) {
-  console.error('Usage: node axe-playwright.js <url> [device]');
+  console.error(
+    JSON.stringify({
+      error: 'Usage: node axe-playwright.js <url> [device]',
+      example: 'node axe-playwright.js https://example.com mobile',
+    })
+  );
   process.exit(1);
 }
 
@@ -57,7 +62,11 @@ const device = args[1] || 'mobile';
 
 // Validate URL
 if (!url.startsWith('http://') && !url.startsWith('https://')) {
-  console.error('URL must start with http:// or https://');
+  console.error(
+    JSON.stringify({
+      error: 'URL must start with http:// or https://',
+    })
+  );
   process.exit(1);
 }
 

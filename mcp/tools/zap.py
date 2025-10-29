@@ -60,14 +60,31 @@ def zap_baseline(url: str, minutes: int = 5) -> dict[str, Any]:
             logger.info(f"Running ZAP baseline scan for {url} (max {minutes} minutes)")
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=minutes*60+60)
 
+            if result.returncode != 0:
+                error_output = (result.stderr or result.stdout or "").strip()
+                logger.error(f"ZAP baseline scan docker error: {error_output}")
+                return {
+                    'status': 'error',
+                    'error': 'Docker execution failed while running OWASP ZAP baseline scan.',
+                    'details': error_output
+                }
+
             # ZAP may return non-zero exit codes even on successful scans
             # Check if output file was created
             if not Path(tmp_path).exists():
                 raise RuntimeError(f"ZAP scan failed to produce output: {result.stderr}")
 
             # Read and parse results
-            with open(tmp_path) as f:
-                raw_data = json.load(f)
+            try:
+                with open(tmp_path) as f:
+                    raw_data = json.load(f)
+            except json.JSONDecodeError as exc:
+                logger.error(f"Failed to parse ZAP output JSON: {exc}")
+                return {
+                    'status': 'error',
+                    'error': 'Docker produced an invalid JSON report during OWASP ZAP scan.',
+                    'details': str(exc)
+                }
 
             # Extract alerts
             alerts = []

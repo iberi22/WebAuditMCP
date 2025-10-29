@@ -20,12 +20,23 @@ def scan_wave(
     report_type: Literal["json", "html"] = "json",
     api_options: Optional[dict[str, Any]] = None
 ) -> dict[str, Any]:
+    """
+    Run a WAVE accessibility scan for the provided URL.
+
+    Args:
+        url: Target URL to audit. Must include http:// or https://.
+        report_type: Desired output type. The API currently returns JSON which is saved to disk.
+        api_options: Optional dictionary with additional query parameters supported by WAVE.
+
+    Returns:
+        Dictionary with status, accessibility summary, and path to the raw WAVE report.
+    """
     try:
         api_key = os.getenv("WAVE_API_KEY")
         if not api_key:
             return {
                 'status': 'error',
-                'error': 'WAVE_API_KEY required'
+                'error': 'WAVE_API_KEY required (try the scan_axe tool for accessibility checks without the API key)'
             }
 
         if not url.startswith(('http://', 'https://')):
