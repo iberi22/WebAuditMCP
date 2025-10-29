@@ -2,6 +2,8 @@
 
 ![WebAuditMCP Logo](./logo.svg)
 
+<!-- NOTE: README uses the repository SVG logo (`logo.svg`) for crisp scalable rendering on GitHub. To use PNG instead, replace the path above with `./logo.png`. -->
+
 # WebAuditMCP
 
 **Professional Web Auditing Tool for AI Agents & Developers**
