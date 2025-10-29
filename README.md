@@ -1,6 +1,6 @@
 <div align="center">
 
-![WebAuditMCP Logo](./logo.png)
+![WebAuditMCP Logo](./logo.svg)
 
 <!-- NOTE: README uses the repository SVG logo (`logo.svg`) for crisp scalable rendering on GitHub. To use PNG instead, replace the path above with `./logo.png`. -->
 
