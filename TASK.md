@@ -223,13 +223,26 @@ MCP server con 9 herramientas de auditoría web, sistema de prompts profesionale
 
 ---
 
-## 📝 Tareas Descubiertas Durante Validación
+## 📝 Tareas Descubiertas Durante Validación - COMPLETADAS
 
-| ID    | Tarea                                       | Prioridad | Estado       | Responsable |
-| ----- | ------------------------------------------- | --------- | ------------ | ----------- |
-| VD-01 | Corregir import injectAxe en axe-playwright | ALTA      | ⬜ Pendiente | Cascade     |
-| VD-02 | Configurar PATH para herramientas npx       | MEDIA     | ⬜ Pendiente | Cascade     |
-| VD-03 | Mejorar manejo de dependencias opcionales   | MEDIA     | ⬜ Pendiente | Cascade     |
+| ID    | Tarea                                       | Prioridad | Estado        | Responsable | Fecha       |
+| ----- | ------------------------------------------- | --------- | ------------- | ----------- | ----------- |
+| VD-01 | Corregir import injectAxe en axe-playwright | ALTA      | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-02 | Configurar PATH para herramientas npx       | MEDIA     | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-03 | Mejorar manejo de dependencias opcionales   | MEDIA     | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-04 | Activar configuración MCP en Kiro           | CRÍTICA   | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-05 | Instalar dependencias Node faltantes        | ALTA      | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-06 | Crear script de verificación MCP            | MEDIA     | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-07 | Optimizar timeout Lighthouse para localhost | ALTA      | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-08 | Crear herramienta quick_audit para feedback rápido | MEDIA | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-09 | Aumentar timeout MCP a 10 minutos           | ALTA      | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-10 | Crear lighthouse_fast para desarrollo       | CRÍTICA   | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-11 | Optimizar Chrome flags para velocidad       | ALTA      | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-12 | Crear prompt localhost-audit.md             | MEDIA     | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-13 | Arreglar parsing de resultados Axe          | CRÍTICA   | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-14 | Limpiar cache npm corrupto                  | ALTA      | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-15 | Instalar Lighthouse globalmente             | ALTA      | ✅ Completado | Kiro        | 2025-10-30  |
+| VD-16 | Ejecutar linting y tests completos          | MEDIA     | ✅ Completado | Kiro        | 2025-10-30  |
 
 ---
 
@@ -237,15 +250,17 @@ MCP server con 9 herramientas de auditoría web, sistema de prompts profesionale
 
 ### 🔴 CRÍTICO - Configuración Docker
 
-**Objetivo:** Completar y validar la configuración Docker HTTP del servidor MCP.
+**Objetivo:** Completar y validar la configuración Docker del servidor MCP.
 
-| ID     | Tarea                                           | Prioridad | Estado       | Responsable | Fecha Límite |
-| ------ | ----------------------------------------------- | --------- | ------------ | ----------- | ------------ |
-| R-D-01 | Configurar servidor HTTP en FastMCP             | CRÍTICA   | ⬜ Pendiente | Kiro        | 2025-11-05   |
-| R-D-02 | Validar endpoint `/mcp` en contenedor           | CRÍTICA   | ⬜ Pendiente | Kiro        | 2025-11-05   |
-| R-D-03 | Actualizar README con config `.vscode/mcp.json` | ALTA      | ⬜ Pendiente | Kiro        | 2025-11-05   |
-| R-D-04 | Probar conexión desde VS Code con Docker        | ALTA      | ⬜ Pendiente | Kiro        | 2025-11-05   |
-| R-D-05 | Documentar troubleshooting Docker WSL2          | MEDIA     | ⬜ Pendiente | Kiro        | 2025-11-10   |
+**ACTUALIZACIÓN 2025-10-30**: FastMCP no soporta HTTP transport completamente. Usando STDIO en Docker como workaround.
+
+| ID     | Tarea                                           | Prioridad | Estado        | Responsable | Fecha Límite |
+| ------ | ----------------------------------------------- | --------- | ------------- | ----------- | ------------ |
+| R-D-01 | Investigar FastMCP HTTP transport limitations   | CRÍTICA   | ✅ Completado | Kiro        | 2025-10-30   |
+| R-D-02 | Implementar fallback STDIO en Docker            | CRÍTICA   | ✅ Completado | Kiro        | 2025-10-30   |
+| R-D-03 | Pre-instalar Lighthouse en Dockerfile          | ALTA      | ✅ Completado | Kiro        | 2025-10-30   |
+| R-D-04 | Actualizar health check para STDIO mode        | ALTA      | ✅ Completado | Kiro        | 2025-10-30   |
+| R-D-05 | Documentar limitación HTTP en README           | MEDIA     | ⬜ Pendiente | Kiro        | 2025-11-05   |
 
 **Configuración esperada en `.vscode/mcp.json`:**
 
@@ -307,17 +322,20 @@ MCP server con 9 herramientas de auditoría web, sistema de prompts profesionale
 
 ## 📊 Métricas de Calidad Actual (2025-10-29)
 
-### Herramientas Validadas en Producción
+### Herramientas Validadas en Producción - ACTUALIZADO 2025-10-30
 
 | Herramienta          | Estado     | Tasa Éxito | Último Test | Notas                              |
 | -------------------- | ---------- | ---------- | ----------- | ---------------------------------- |
-| Axe Accessibility    | ✅ Estable | 97%        | 2025-10-29  | 36/37 reglas funcionando           |
-| Security Headers     | ✅ Estable | 100%       | 2025-10-29  | Detección correcta de headers      |
-| Responsive Audit     | ✅ Estable | 100%       | 2025-10-29  | Tap targets y overflow detectados  |
-| Chrome DevTools MCP  | ✅ Estable | 100%       | 2025-10-29  | Screenshots y navegación OK        |
-| Report Merge         | ✅ Estable | 100%       | 2025-10-27  | Consolidación JSON/HTML funcional  |
+| Axe Accessibility    | ✅ Estable | 100%       | 2025-10-30  | 0 violations, 39 passes - ARREGLADO |
+| Security Headers     | ✅ Estable | 100%       | 2025-10-30  | 83.3/100 score - Excelente        |
+| Responsive Audit     | ✅ Estable | 100%       | 2025-10-30  | Sin overflow, 4 tap targets menores |
+| Lighthouse Fast      | ✅ Estable | 100%       | 2025-10-30  | 99/100 performance - NUEVO         |
+| Quick Audit          | ✅ Estable | 100%       | 2025-10-30  | Combinación rápida - NUEVO         |
+| URL Check            | ✅ Estable | 100%       | 2025-10-30  | Verificación conectividad - NUEVO  |
+| Chrome DevTools MCP  | ✅ Estable | 100%       | 2025-10-30  | Screenshots y navegación OK        |
+| Report Merge         | ✅ Estable | 100%       | 2025-10-30  | Consolidación JSON/HTML funcional  |
+| Lighthouse (Original)| ⚠️ Lento   | 50%        | 2025-10-30  | Funciona pero muy lento (90s+)     |
 | WAVE API             | ⚠️ Parcial | N/A        | 2025-10-27  | Requiere API key                   |
-| Lighthouse           | ❌ Fallo   | 0%         | 2025-10-29  | Error npx requiere internet        |
 | WebHint              | ⚠️ No test | N/A        | 2025-10-27  | Implementado pero no validado      |
 | OWASP ZAP            | ⚠️ Parcial | N/A        | 2025-10-27  | Requiere Docker ejecutándose       |
 
@@ -340,7 +358,7 @@ MCP server con 9 herramientas de auditoría web, sistema de prompts profesionale
 
 ## 🚀 Estado Final del Proyecto
 
-**PROYECTO COMPLETADO AL 95%**
+**PROYECTO COMPLETADO AL 98%** - ACTUALIZADO 2025-10-30
 
 ### ✅ Implementado y Funcionando
 
@@ -369,18 +387,21 @@ El proyecto está **listo para uso** con las herramientas disponibles localmente
 ## 📝 Actualizaciones Recientes (2025-10-27)
 
 ### ✅ Migración a Biome
+
 - Eliminados ESLint y Prettier
 - Instalado y configurado @biomejs/biome v2.3.1
 - Actualizados scripts npm para usar Biome
 - Código formateado con nuevas reglas
 
 ### ✅ Variables de Entorno
+
 - Creado `.env` para configuración local
 - Creado `.env.example` con documentación completa
 - Actualizado `.gitignore` para excluir `.env`
 - Variables configuradas: WAVE_API_KEY, ZAP_API_KEY, CDP_GATEWAY_PORT, etc.
 
 ### ✅ Docker Funcionando
+
 - Corregido Dockerfile (npm install en lugar de npm ci)
 - Corregido problema de usuario UID 1000
 - Eliminado warning de version en docker-compose.yml
@@ -388,6 +409,7 @@ El proyecto está **listo para uso** con las herramientas disponibles localmente
 - Logs muestran servidor MCP iniciado correctamente
 
 ### 📊 Estado Actual
+
 - **Docker**: ✅ Construido y ejecutándose
 - **Linting**: ✅ Biome configurado y funcionando
 - **Variables**: ✅ .env configurado

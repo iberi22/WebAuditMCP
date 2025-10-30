@@ -53,9 +53,9 @@ services:
           cpus: '0.5'
           memory: 512M
 
-    # Health monitoring
+    # Health monitoring - check if Python process is running
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/mcp"]
+      test: ["CMD", "pgrep", "-f", "python.*server.py"]
       interval: 30s
       timeout: 10s
       retries: 3

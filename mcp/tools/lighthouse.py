@@ -126,7 +126,7 @@ def audit_lighthouse(url: str, device: Literal["mobile", "desktop"] = "mobile") 
             tmp_path = tmp_file.name
 
         try:
-            # Chrome flags to avoid localhost warnings and interstitials
+            # Chrome flags optimized for speed (especially localhost)
             chrome_flags = [
                 "--headless",
                 "--disable-gpu",
@@ -137,11 +137,19 @@ def audit_lighthouse(url: str, device: Literal["mobile", "desktop"] = "mobile") 
                 "--disable-extensions",
                 "--disable-sync",
                 "--metrics-recording-only",
-                "--disable-features=Translate",
+                "--disable-features=Translate,VizDisplayCompositor",
                 "--safebrowsing-disable-download-protection",
                 "--safebrowsing-disable-extension-blacklist",
                 "--ignore-certificate-errors",
-                "--allow-insecure-localhost"
+                "--allow-insecure-localhost",
+                "--disable-background-timer-throttling",
+                "--disable-renderer-backgrounding",
+                "--disable-backgrounding-occluded-windows",
+                "--disable-ipc-flooding-protection",
+                "--disable-hang-monitor",
+                "--disable-prompt-on-repost",
+                "--disable-domain-reliability",
+                "--disable-component-extensions-with-background-pages"
             ]
 
             # Run Lighthouse
@@ -161,11 +169,25 @@ def audit_lighthouse(url: str, device: Literal["mobile", "desktop"] = "mobile") 
                 "--quiet",
                 f"--chrome-flags={' '.join(chrome_flags)}"
             ]
+
+            # Fast mode for localhost
+            if is_localhost:
+                cmd += [
+                    "--throttling-method=provided",
+                    "--disable-storage-reset",
+                    "--skip-audits=unused-javascript,unused-css-rules,largest-contentful-paint-element,screenshot-thumbnails"
+                ]
+
             if preset:
                 cmd.append(f"--preset={preset}")
 
             logger.info(f"Running Lighthouse audit for {url} with {device} preset")
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            # Ultra-fast timeout for localhost, normal for remote
+            timeout = 30 if is_localhost else 90
+            logger.info(f"Using {timeout}s timeout for {'localhost' if is_localhost else 'remote'} URL")
+            if is_localhost:
+                logger.info("Using fast mode optimizations for localhost")
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
 
             if result.returncode != 0:
                 error_msg = result.stderr.strip()
@@ -228,10 +250,13 @@ def audit_lighthouse(url: str, device: Literal["mobile", "desktop"] = "mobile") 
             Path(tmp_path).unlink(missing_ok=True)
 
     except subprocess.TimeoutExpired:
+        timeout_msg = f"Lighthouse audit timed out after {60 if is_localhost else 90} seconds"
         return {
             'status': 'error',
-            'error': 'Lighthouse audit timed out after 120 seconds',
-            'suggestion': 'Try auditing a simpler page or increase timeout'
+            'error': timeout_msg,
+            'url': url,
+            'suggestion': 'For localhost: ensure your dev server is fast. For remote: try a simpler page or use security_headers instead',
+            'alternatives': ['security_headers', 'responsive_audit', 'scan_axe']
         }
     except FileNotFoundError as e:
         dependency_check = _check_lighthouse_available()

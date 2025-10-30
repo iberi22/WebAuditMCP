@@ -44,8 +44,8 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # Ensure Playwright browsers are installed
 RUN npx playwright install --with-deps chromium
 
-# Install chrome-devtools-mcp globally (optional)
-RUN npm install -g chrome-devtools-mcp || echo "chrome-devtools-mcp installation failed, continuing..."
+# Install global Node.js tools for auditing
+RUN npm install -g lighthouse chrome-devtools-mcp @hint/hint || echo "Some npm packages failed, continuing..."
 
 # Copy application code
 COPY mcp/ ./mcp/

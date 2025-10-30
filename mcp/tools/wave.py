@@ -8,7 +8,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import httpx
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def scan_wave(
     url: str,
     report_type: Literal["json", "html"] = "json",
-    api_options: Optional[dict[str, Any]] = None
+    api_options: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """
     Run a WAVE accessibility scan for the provided URL.

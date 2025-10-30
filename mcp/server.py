@@ -17,16 +17,19 @@ from fastmcp import FastMCP
 # Add tools directory to path
 sys.path.append(str(Path(__file__).parent))
 
+from tools.auth_helper import auto_login, get_available_test_users
 from tools.axe_playwright import scan_axe
 from tools.cdp_gateway import cdp_emulate, cdp_health, cdp_open, cdp_screenshot, cdp_trace
 from tools.lighthouse import audit_lighthouse
+from tools.lighthouse_fast import lighthouse_fast
+from tools.quick_audit import quick_audit
 from tools.report_merge import report_merge
 from tools.responsive import responsive_audit
 from tools.security_headers import security_headers
+from tools.url_check import url_check
 from tools.wave import scan_wave
 from tools.webhint import webhint_scan
 from tools.zap import zap_baseline
-from tools.auth_helper import auto_login, get_available_test_users
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -119,6 +122,9 @@ mcp.tool()(responsive_audit)
 mcp.tool()(zap_baseline)
 mcp.tool()(scan_wave)
 mcp.tool()(report_merge)
+mcp.tool()(quick_audit)
+mcp.tool()(lighthouse_fast)
+mcp.tool()(url_check)
 
 # Register authentication and test user tools
 mcp.tool()(auto_login)
@@ -137,19 +143,19 @@ if __name__ == "__main__":
     logger.info(f"Chrome MCP Gateway: {'Enabled' if CHROME_MCP_ENABLED else 'Disabled'}")
     logger.info(f"Artifacts directory: {ARTIFACTS_DIR}")
 
-    # Detect environment: Docker or local
-    import socket
+    # Check for HTTP mode override
+    force_http = os.getenv("MCP_TRANSPORT", "").lower() == "http"
     in_docker = os.path.exists('/.dockerenv')
 
-    if in_docker:
-        # Docker: Use HTTP transport for remote access
-        logger.info("Running in Docker container - using HTTP transport")
-        mcp.run(
-            transport="http",
-            host="0.0.0.0",  # Listen on all interfaces
-            port=8000,
-            path="/mcp"
-        )
+    if force_http or in_docker:
+        # HTTP mode: For Docker or when explicitly requested
+        logger.info("Running in HTTP mode")
+        logger.warning("HTTP transport is experimental - STDIO mode recommended")
+
+        # For now, fall back to STDIO even in Docker
+        # TODO: Implement proper HTTP transport when FastMCP supports it
+        logger.info("Falling back to STDIO transport (HTTP not fully supported)")
+        mcp.run(transport="stdio")
     else:
         # Local: Use STDIO for desktop clients (Claude Desktop, Cursor, etc.)
         logger.info("Running locally - using STDIO transport")

@@ -31,17 +31,20 @@ WebAuditMCP is a comprehensive web auditing MCP (Model Context Protocol) server 
 
 ### 🛠️ Available Tools
 
-| Tool | Purpose |
-|------|---------|
-| **Lighthouse** | Performance, SEO, Best Practices auditing with Core Web Vitals |
-| **axe Accessibility** | WCAG 2.0/2.1 compliance testing and accessibility violation detection |
-| **WAVE** | Alternative accessibility scanner with visual reporting |
-| **Security Headers** | HTTP security headers analysis (CSP, HSTS, X-Frame-Options, etc.) |
-| **WebHint** | Best practices scanner for modern web development |
-| **Responsive Audit** | Multi-viewport testing for mobile/tablet/desktop compatibility |
-| **OWASP ZAP** | Security vulnerability scanning (SQL injection, XSS, CSRF, etc.) |
-| **Chrome DevTools MCP** | Browser automation, screenshots, network inspection, console logs |
-| **Report Merge** | Consolidate multiple audit results with scoring and budgets |
+| Tool | Purpose | Status |
+|------|---------|--------|
+| **Lighthouse** | Performance, SEO, Best Practices auditing with Core Web Vitals | ✅ Production Ready |
+| **Lighthouse Fast** | Ultra-fast performance auditing optimized for development | ✅ Production Ready |
+| **axe Accessibility** | WCAG 2.0/2.1 compliance testing and accessibility violation detection | ✅ Production Ready |
+| **WAVE** | Alternative accessibility scanner with visual reporting | ⚠️ Requires API Key |
+| **Security Headers** | HTTP security headers analysis (CSP, HSTS, X-Frame-Options, etc.) | ✅ Production Ready |
+| **WebHint** | Best practices scanner for modern web development | ⚠️ Requires Setup |
+| **Responsive Audit** | Multi-viewport testing for mobile/tablet/desktop compatibility | ✅ Production Ready |
+| **OWASP ZAP** | Security vulnerability scanning (SQL injection, XSS, CSRF, etc.) | ⚠️ Requires Docker |
+| **Chrome DevTools MCP** | Browser automation, screenshots, network inspection, console logs | ✅ Production Ready |
+| **Quick Audit** | Combined fast auditing for immediate feedback | ✅ Production Ready |
+| **URL Check** | Connectivity verification before running audits | ✅ Production Ready |
+| **Report Merge** | Consolidate multiple audit results with scoring and budgets | ✅ Production Ready |
 
 ### ⚡ Quick Start
 
@@ -129,7 +132,6 @@ Add to `.vscode/mcp.json`:
 
 > **Note**: Docker HTTP mode requires additional server configuration. See [Docker Configuration](#docker-configuration) section below.
 
-
 ### 📝 Professional Audit Prompts
 
 We provide battle-tested prompts for comprehensive audits. Each prompt generates a **single Markdown report** optimized for AI iteration.
@@ -163,7 +165,13 @@ prompts/
 
 ### 🎯 Usage Examples
 
-#### Example 1: Complete Website Audit
+#### Example 1: Development Audit (Fast)
+
+```
+Using WebAuditMCP, run lighthouse_fast on http://localhost:3000 with device desktop
+```
+
+#### Example 2: Complete Website Audit
 
 ```
 Using WebAuditMCP, perform a comprehensive audit of https://example.com following the complete-audit.md prompt. Generate a single Markdown report with:
@@ -173,16 +181,13 @@ Using WebAuditMCP, perform a comprehensive audit of https://example.com followin
 4. Before/after comparison if baseline exists
 ```
 
-#### Example 2: Security-Focused Audit
+#### Example 3: Quick Development Check
 
 ```
-Execute security audit on https://myapp.com using:
-1. security/headers-audit.md prompt
-2. security/vulnerabilities.md prompt
-Generate consolidated security report with risk levels and remediation steps.
+Using WebAuditMCP, follow the localhost-audit.md prompt for http://localhost:3000/login
 ```
 
-#### Example 3: Accessibility Compliance
+#### Example 4: Accessibility Compliance
 
 ```
 Audit https://website.com for WCAG 2.1 AA compliance using accessibility/wcag-compliance.md. Include:
@@ -306,18 +311,22 @@ export AUDIT_LANGUAGE=en  # English (default)
 ### 🆘 Troubleshooting
 
 **Lighthouse fails with "command not found":**
+
 - Ensure Node.js 22+ is installed
 - Tool will auto-install on first run via `npx -y lighthouse`
 
 **Chrome DevTools not connecting:**
+
 - Check `CHROME_MCP_ENABLED=true` in environment
 - Verify Chrome/Chromium is installed
 
 **WAVE API errors:**
+
 - Add `WAVE_API_KEY` to `.env` file
-- Get free API key at https://wave.webaim.org/api/
+- Get free API key at <https://wave.webaim.org/api/>
 
 **Lighthouse requires internet on first run:**
+
 - First execution downloads Lighthouse via npx (requires internet)
 - Subsequent runs use cached version
 - For offline mode, pre-install: `npm install -g lighthouse`
@@ -341,6 +350,7 @@ The following configuration is planned for future releases:
 ```
 
 **What's Missing**:
+
 - FastMCP HTTP server endpoint configuration
 - Docker container health checks for HTTP endpoint
 - Documentation for troubleshooting Docker WSL2 issues on Windows

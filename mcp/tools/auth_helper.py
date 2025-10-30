@@ -6,8 +6,9 @@ Handles authentication flows with test credentials.
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Literal
-from playwright.async_api import async_playwright, Page, Browser
+from typing import Any
+
+from playwright.async_api import async_playwright
 
 from .credentials import get_test_credentials
 
@@ -22,8 +23,8 @@ async def login_with_playwright(
     submit_selector: str = 'button[type="submit"]',
     success_selector: str = '.dashboard',
     headless: bool = True,
-    screenshot_path: Optional[str] = None
-) -> Dict[str, Any]:
+    screenshot_path: str | None = None
+) -> dict[str, Any]:
     """
     Perform automated login using Playwright.
 
@@ -127,7 +128,7 @@ def auto_login(
     submit_selector: str = 'button[type="submit"]',
     success_selector: str = '.dashboard',
     headless: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Synchronous wrapper for automated login.
 
@@ -154,7 +155,7 @@ def auto_login(
     ))
 
 
-def get_available_test_users() -> Dict[str, Any]:
+def get_available_test_users() -> dict[str, Any]:
     """
     Get information about available test users.
 

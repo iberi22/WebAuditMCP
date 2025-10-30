@@ -57,6 +57,18 @@ def scan_axe(url: str, device: Literal["mobile", "desktop"] = "mobile") -> dict[
                 'tags': violation.get('tags', [])
             })
 
+        # Normalize incomplete (potential issues)
+        incomplete = []
+        for item in raw_data.get('incomplete', []):
+            incomplete.append({
+                'id': item.get('id'),
+                'impact': item.get('impact'),
+                'description': item.get('description'),
+                'help': item.get('help'),
+                'nodes': len(item.get('nodes', [])),
+                'tags': item.get('tags', [])
+            })
+
         # Count passes and incomplete
         passes_count = len(raw_data.get('passes', []))
         incomplete_count = len(raw_data.get('incomplete', []))
@@ -67,8 +79,15 @@ def scan_axe(url: str, device: Literal["mobile", "desktop"] = "mobile") -> dict[
             'device': device,
             'violations': violations,
             'violationsCount': len(violations),
-            'passesCount': passes_count,
+            'incomplete': incomplete,
             'incompleteCount': incomplete_count,
+            'passesCount': passes_count,
+            'summary': {
+                'violations': len(violations),
+                'incomplete': incomplete_count,
+                'passes': passes_count,
+                'total_rules_tested': len(violations) + incomplete_count + passes_count
+            },
             'raw': raw_data
         }
 
