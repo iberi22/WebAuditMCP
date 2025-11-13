@@ -2,22 +2,22 @@
 Smoke tests for MCP Auditor Local tools.
 """
 
-import json
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add mcp directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "mcp"))
 
-from tools.lighthouse import audit_lighthouse
 from tools.axe_playwright import scan_axe
-from tools.webhint import webhint_scan
-from tools.security_headers import security_headers
-from tools.responsive import responsive_audit
-from tools.zap import zap_baseline
-from tools.wave import scan_wave
+from tools.lighthouse import audit_lighthouse
 from tools.report_merge import report_merge
+from tools.responsive import responsive_audit
+from tools.security_headers import security_headers
+from tools.wave_api import scan_wave
+from tools.webhint import webhint_scan
+from tools.zap_simple import zap_baseline_simple
 
 
 class TestLighthouse:
@@ -157,7 +157,7 @@ class TestZap:
     @pytest.mark.slow
     def test_zap_example_com(self):
         """Test ZAP baseline scan against example.com."""
-        result = zap_baseline("https://example.com", 1)  # 1 minute scan
+        result = zap_baseline_simple("https://example.com", 1)  # 1 minute scan
 
         # ZAP might not be available (Docker required)
         if result["status"] == "error" and "Docker" in result["error"]:
@@ -171,13 +171,13 @@ class TestZap:
 
     def test_zap_invalid_url(self):
         """Test ZAP with invalid URL."""
-        result = zap_baseline("not-a-url", 1)
+        result = zap_baseline_simple("not-a-url", 1)
         assert result["status"] == "error"
         assert "error" in result
 
     def test_zap_invalid_minutes(self):
         """Test ZAP with invalid duration."""
-        result = zap_baseline("https://example.com", 0)
+        result = zap_baseline_simple("https://example.com", 0)
         assert result["status"] == "error"
         assert "error" in result
 

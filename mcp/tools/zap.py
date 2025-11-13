@@ -45,20 +45,26 @@ def zap_baseline(url: str, minutes: int = 5) -> dict[str, Any]:
             tmp_path = tmp_file.name
 
         try:
-            # Run ZAP baseline scan
+            # Convert localhost to host.docker.internal for Docker access
+            scan_url = url.replace('localhost', 'host.docker.internal')
+
+            # Run ZAP baseline scan with new image and correct JSON output
+            output_filename = Path(tmp_path).name
             cmd = [
                 "docker", "run", "--rm", "-t",
+                "--add-host=host.docker.internal:host-gateway",
                 "-v", f"{Path(tmp_path).parent}:/zap/wrk/:rw",
-                "owasp/zap2docker-stable",
+                "ghcr.io/zaproxy/zaproxy:stable",
                 "zap-baseline.py",
-                "-t", url,
+                "-t", scan_url,
                 "-m", str(minutes),
-                "-J", f"/zap/wrk/{Path(tmp_path).name}",
-                "-I"  # Ignore warnings
+                "-J", f"/zap/wrk/{output_filename}",
+                "-I",  # Ignore warnings
+                "-r", f"/zap/wrk/zap_report_{output_filename}.html"  # Also generate HTML report
             ]
 
             logger.info(f"Running ZAP baseline scan for {url} (max {minutes} minutes)")
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=minutes*60+60)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=minutes * 60 + 60)
 
             if result.returncode != 0:
                 error_output = (result.stderr or result.stdout or "").strip()
@@ -77,13 +83,26 @@ def zap_baseline(url: str, minutes: int = 5) -> dict[str, Any]:
             # Read and parse results
             try:
                 with open(tmp_path) as f:
-                    raw_data = json.load(f)
-            except json.JSONDecodeError as exc:
+                    content = f.read()
+                    if not content.strip():
+                        raise ValueError("ZAP output file is empty")
+                    raw_data = json.loads(content)
+            except (json.JSONDecodeError, ValueError) as exc:
                 logger.error(f"Failed to parse ZAP output JSON: {exc}")
+                # Try to read the file content for debugging
+                try:
+                    with open(tmp_path) as f:
+                        file_content = f.read()[:500]  # First 500 chars
+                except (IOError, OSError):
+                    file_content = "Could not read file"
+
                 return {
                     'status': 'error',
-                    'error': 'Docker produced an invalid JSON report during OWASP ZAP scan.',
-                    'details': str(exc)
+                    'error': 'ZAP scan completed but produced invalid JSON output',
+                    'details': f"JSON error: {exc}",
+                    'file_content': file_content,
+                    'docker_stdout': result.stdout[:500] if result.stdout else "",
+                    'docker_stderr': result.stderr[:500] if result.stderr else ""
                 }
 
             # Extract alerts
@@ -128,7 +147,7 @@ def zap_baseline(url: str, minutes: int = 5) -> dict[str, Any]:
     except subprocess.TimeoutExpired:
         return {
             'status': 'error',
-            'error': f'ZAP baseline scan timed out after {minutes*60+60} seconds'
+            'error': f'ZAP baseline scan timed out after {minutes * 60 + 60} seconds'
         }
     except Exception as e:
         logger.error(f"ZAP baseline scan failed: {e}")

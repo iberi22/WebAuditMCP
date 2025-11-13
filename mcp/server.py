@@ -27,9 +27,9 @@ from tools.report_merge import report_merge
 from tools.responsive import responsive_audit
 from tools.security_headers import security_headers
 from tools.url_check import url_check
-from tools.wave import scan_wave
+from tools.wave_api import scan_wave
 from tools.webhint import webhint_scan
-from tools.zap import zap_baseline
+from tools.zap_simple import zap_baseline_simple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -119,7 +119,7 @@ mcp.tool()(scan_axe)
 mcp.tool()(webhint_scan)
 mcp.tool()(security_headers)
 mcp.tool()(responsive_audit)
-mcp.tool()(zap_baseline)
+mcp.tool()(zap_baseline_simple)
 mcp.tool()(scan_wave)
 mcp.tool()(report_merge)
 mcp.tool()(quick_audit)
