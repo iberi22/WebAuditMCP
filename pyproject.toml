@@ -7,7 +7,7 @@ name = "mcp-auditor-local"
 version = "1.0.0"
 description = "Local-first MCP server for web auditing tools"
 authors = [{name = "MCP Auditor Local Team"}]
-license = {text = "MIT"}
+license = {text = "AGPL-3.0-or-later"}
 requires-python = ">=3.10"
 dependencies = [
     "fastmcp>=0.1.0",
