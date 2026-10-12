@@ -26,12 +26,40 @@ def _resolve_npx_command() -> str | None:
     return None
 
 
+def _resolve_local_bin(name: str) -> str | None:
+    """Prefer the repo-pinned binary from the workspace node_modules.
+
+    Using the pinned local install keeps CI and dev on the same tool
+    versions instead of whatever `npx -y` happens to download that day.
+    npm hoists workspace installs to the repo root, so check both the
+    root `.bin` and the `node-tools`-local one.
+    """
+    root = Path(__file__).parent.parent.parent
+    bases = [
+        root / "node_modules" / ".bin",
+        root / "node-tools" / "node_modules" / ".bin",
+    ]
+    candidates = [name]
+    if os.name == "nt":
+        candidates = [f"{name}.cmd", name]
+    for base in bases:
+        for candidate in candidates:
+            path = base / candidate
+            if path.is_file():
+                return str(path)
+    return None
+
+
 def _resolve_lighthouse_runner() -> tuple[list[str], bool] | None:
     """Determine how to invoke Lighthouse.
 
     Returns:
         Tuple of (base command list, uses_npx flag) or None if unavailable.
     """
+    local_cmd = _resolve_local_bin("lighthouse")
+    if local_cmd:
+        return ([local_cmd], False)
+
     direct_cmd = shutil.which("lighthouse.cmd") if os.name == "nt" else shutil.which("lighthouse")
     if direct_cmd:
         return ([direct_cmd], False)
