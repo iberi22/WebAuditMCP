@@ -23,7 +23,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+
+      - name: Install Node.js dependencies
+        # The repo has npm workspaces (root package.json) and no lockfile,
+        # so a plain install (not `npm ci`) from the root is used. npm hoists
+        # the node-tools deps to the root node_modules. These provide the
+        # pinned `playwright`, `lighthouse` and `hint` binaries the Python
+        # tools shell out to.
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright browsers
+        # Installs Chromium plus the OS libraries headless Chrome needs.
+        working-directory: node-tools
+        run: npx playwright install --with-deps chromium
 
       - name: Install Python dependencies
         run: |
